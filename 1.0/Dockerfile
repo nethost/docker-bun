@@ -108,7 +108,7 @@ RUN addgroup -g 1000 bun \
     && which bun \
     && which bunx \
     && bun --version 
-    
+        
 WORKDIR /home/bun/app
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["/usr/local/bin/bun"]

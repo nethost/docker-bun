@@ -1,0 +1,11 @@
+services:
+  latest:
+    build:
+      context: .
+      target: latest
+    image: nethost/bun:1.1
+  builder:
+    build:
+      context: .
+      target: builder
+    image: nethost/bun:1.1-builder

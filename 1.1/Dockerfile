@@ -1,5 +1,6 @@
-FROM nethost/alpine:3.18 AS build
+FROM nethost/alpine:3.20 AS build
 
+# https://github.com/oven-sh/bun/releases
 ARG BUN_VERSION=latest
 
 # TODO: Instead of downloading glibc from a third-party source, we should
@@ -88,27 +89,33 @@ RUN apk --no-cache add \
       *) echo "error: unsupported architecture '$arch'"; exit 1 ;; \
     esac
 
-### latest ###
+FROM nethost/alpine:3.20 as latest
+LABEL maintainer="hi@billgo.me"
 
-FROM nethost/alpine:3.18 as latest
+# Disable the runtime transpiler cache by default inside Docker containers.
+# On ephemeral containers, the cache is not useful
+ARG BUN_RUNTIME_TRANSPILER_CACHE_PATH=0
+ENV BUN_RUNTIME_TRANSPILER_CACHE_PATH=${BUN_RUNTIME_TRANSPILER_CACHE_PATH}
 
-COPY --from=build /tmp/glibc.apk /tmp/
-COPY --from=build /tmp/glibc-bin.apk /tmp/
+# Ensure `bun install -g` works
+ARG BUN_INSTALL_BIN=/usr/local/bin
+ENV BUN_INSTALL_BIN=${BUN_INSTALL_BIN}
+
 COPY --from=build /usr/local/bin/bun /usr/local/bin/
 COPY docker-entrypoint.sh /usr/local/bin/
 
-RUN addgroup -g 1000 bun \
+# Temporarily use the `build`-stage /tmp folder to access the glibc APKs:
+RUN --mount=type=bind,from=build,source=/tmp,target=/tmp \
+    addgroup -g 1000 bun \
     && adduser -u 1000 -G bun -s /bin/sh -D bun \
     && apk --no-cache --force-overwrite --allow-untrusted add \
       /tmp/glibc.apk \
       /tmp/glibc-bin.apk \
-    && rm /tmp/glibc.apk \
-    && rm /tmp/glibc-bin.apk \
     && ln -s /usr/local/bin/bun /usr/local/bin/bunx \
     && which bun \
     && which bunx \
-    && bun --version 
-        
+    && bun --version
+
 WORKDIR /home/bun/app
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["/usr/local/bin/bun"]
@@ -118,8 +125,7 @@ CMD ["/usr/local/bin/bun"]
 FROM latest as builder
 LABEL maintainer="hi@billgo.me"
 
-ENV PYTHONUNBUFFERED=1
-RUN apk add --update --no-cache python3 mongodb-tools make jq git && ln -sf python3 /usr/bin/python && python3 -m ensurepip && pip3 install --no-cache --upgrade pip setuptools && rm -rf /var/cache/apk/*
+RUN apk add --update --no-cache mongodb-tools make jq git && rm -rf /var/cache/apk/*
 
 WORKDIR /home/bun/app
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

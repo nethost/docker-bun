@@ -1,4 +1,7 @@
-FROM nethost/alpine:3.20 AS build
+FROM alpine:3.20 as build
+LABEL maintainer="hi@billgo.me"
+
+RUN apk add -U bash nano tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && apk del tzdata
 
 # https://github.com/oven-sh/bun/releases
 ARG BUN_VERSION=latest
@@ -89,8 +92,11 @@ RUN apk --no-cache add \
       *) echo "error: unsupported architecture '$arch'"; exit 1 ;; \
     esac
 
-FROM nethost/alpine:3.20 as latest
+
+FROM alpine:3.20 as latest
 LABEL maintainer="hi@billgo.me"
+
+RUN apk add -U bash nano tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && apk del tzdata
 
 # Disable the runtime transpiler cache by default inside Docker containers.
 # On ephemeral containers, the cache is not useful

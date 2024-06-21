@@ -1,4 +1,4 @@
-FROM alpine:3.20 as build
+FROM alpine:3.20 AS build
 LABEL maintainer="hi@billgo.me"
 
 RUN apk add -U bash nano tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && apk del tzdata
@@ -93,7 +93,7 @@ RUN apk --no-cache add \
     esac
 
 
-FROM alpine:3.20 as latest
+FROM alpine:3.20 AS latest
 LABEL maintainer="hi@billgo.me"
 
 RUN apk add -U bash nano tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && apk del tzdata
@@ -128,7 +128,7 @@ CMD ["/usr/local/bin/bun"]
 
 ### builder ###
 
-FROM latest as builder
+FROM latest AS builder
 LABEL maintainer="hi@billgo.me"
 
 RUN apk add --update --no-cache mongodb-tools make jq git && rm -rf /var/cache/apk/*

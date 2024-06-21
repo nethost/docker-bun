@@ -90,7 +90,7 @@ RUN apk --no-cache add \
 
 ### latest ###
 
-FROM nethost/alpine:3.18 as latest
+FROM nethost/alpine:3.18 AS latest
 
 COPY --from=build /tmp/glibc.apk /tmp/
 COPY --from=build /tmp/glibc-bin.apk /tmp/
@@ -115,7 +115,7 @@ CMD ["/usr/local/bin/bun"]
 
 ### builder ###
 
-FROM latest as builder
+FROM latest AS builder
 LABEL maintainer="hi@billgo.me"
 
 ENV PYTHONUNBUFFERED=1

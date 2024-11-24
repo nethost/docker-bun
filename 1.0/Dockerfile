@@ -118,8 +118,7 @@ CMD ["/usr/local/bin/bun"]
 FROM latest AS builder
 LABEL maintainer="hi@billgo.me"
 
-ENV PYTHONUNBUFFERED=1
-RUN apk add --update --no-cache python3 mongodb-tools make jq git && ln -sf python3 /usr/bin/python && python3 -m ensurepip && pip3 install --no-cache --upgrade pip setuptools && rm -rf /var/cache/apk/*
+RUN apk add --update --no-cache mongodb-tools make jq git && rm -rf /var/cache/apk/*
 
 WORKDIR /home/bun/app
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
